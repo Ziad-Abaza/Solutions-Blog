@@ -7,6 +7,11 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/showdown/2.1.0/showdown.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.2.0/crypto-js.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- إضافة Prism.js -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/copy-to-clipboard/prism-copy-to-clipboard.min.js"></script>
     <style>
         /* Custom styles for Markdown content */
         .markdown-content h1 { font-size: 2em; font-weight: bold; margin: 0.67em 0; }
@@ -17,6 +22,8 @@
         .markdown-content ul { list-style-type: disc; margin: 1em 0; padding-left: 40px; }
         .markdown-content ol { list-style-type: decimal; margin: 1em 0; padding-left: 40px; }
         .markdown-content code { background-color: #f3f4f6; padding: 2px 4px; border-radius: 4px; }
+        .markdown-content pre { background-color: #2d2d2d; padding: 1em; border-radius: 4px; overflow-x: auto; }
+        .markdown-content pre code { background-color: transparent; padding: 0; border-radius: 0; }
     </style>
 </head>
 <body class="bg-gray-100 text-gray-800">
@@ -165,6 +172,8 @@
                     </button>
                 </div>
             `;
+            // إعادة تفعيل Prism.js لتلوين الكود
+            Prism.highlightAll();
         }
         
         async function addComment(index) {
