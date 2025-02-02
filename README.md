@@ -20,7 +20,7 @@ Welcome to the Solutions Blog project! This is a web application that allows use
 
 1. Clone the repository:
     ```bash
-    git clone https://github.com/your-username/solutions-blog.git
+    git clone https://github.com/Ziad-Abaza/Solutions-Blog.git
     ```
 
 2. Open `index.html` in your preferred browser to start using the application.
