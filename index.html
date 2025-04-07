@@ -104,12 +104,8 @@
                 let response = await fetch(`https://api.github.com/gists/${gistId}`);
                 let data = await response.json();
                 posts = JSON.parse(data.files["articles.json"].content || "[]");
-                if (window.location.pathname.includes("index.html")) {
                 displayPosts(posts);
                 populateSidebar(posts);
-                } else if (window.location.pathname.includes("post.html")) {
-                displayPost();
-                }
             } catch (error) {
                 console.error("Error fetching posts:", error);
                 Swal.fire("Error", "An error occurred while fetching posts.", "error");
