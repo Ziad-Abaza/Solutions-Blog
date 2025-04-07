@@ -1,171 +1,224 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <link rel="shortcut icon" href="logo.ico" type="image/x-icon">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>البرشامة</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/showdown/2.1.0/showdown.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.2.0/crypto-js.min.js"></script>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/copy-to-clipboard/prism-copy-to-clipboard.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <style>
-        .markdown-content h1 { font-size: 2em; font-weight: bold; margin: 0.67em 0; }
-        .markdown-content h2 { font-size: 1.5em; font-weight: bold; margin: 0.83em 0; }
-        .markdown-content h3 { font-size: 1.17em; font-weight: bold; margin: 1em 0; }
-        .markdown-content p { margin: 1em 0; }
-        .markdown-content a { color: #3b82f6; text-decoration: underline; }
-        .markdown-content ul { list-style-type: disc; margin: 1em 0; padding-left: 40px; }
-        .markdown-content ol { list-style-type: decimal; margin: 1em 0; padding-left: 40px; }
-        .markdown-content code { background-color: #f3f4f6; padding: 2px 4px; border-radius: 4px; }
-        .markdown-content pre { background-color: #2d2d2d; padding: 1em; border-radius: 8px; overflow-x: auto; margin: 1em 0; }
-        .markdown-content pre code { background-color: transparent; padding: 0; border-radius: 0; color: #f8f8f2; }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        .loader {
-            border-top-color: #3b82f6;
-            animation: spin 1s linear infinite;
-        }
-    </style>
-</head>
-<body class="bg-gray-100 text-gray-800">
-    <!-- Loading Spinner -->
-    <div id="loading" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center">
-        <div class="bg-white p-6 rounded-lg shadow-lg">
-            <div class="loader ease-linear rounded-full border-4 border-t-4 border-gray-200 h-12 w-12 mb-4"></div>
-            <p class="text-center text-gray-700">Loading...</p>
+    <head>
+        <meta charset="UTF-8">
+        <link rel="shortcut icon" href="logo.ico" type="image/x-icon">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>البرشامة</title>
+        <!-- Bootstrap CSS -->
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+        <!-- Prism.js for Code Highlighting -->
+        <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+        <!-- Custom Styles -->
+        <link rel="stylesheet" href="styles.css">
+    </head>
+    <body class="bg-light">
+        <!-- Navbar -->
+        <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm">
+            <div class="container-fluid gap-3">
+                <button
+                    class="navbar-toggler"
+                    type="button"
+                    data-bs-toggle="offcanvas"
+                    data-bs-target="#sidebar"
+                >
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <a class="navbar-brand text-primary fw-bold" href="#">البرشامة</a>
+                <div class="ms-auto d-none d-md-flex">
+                    <input
+                        type="text"
+                        id="search"
+                        placeholder="Search posts by title..."
+                        class="form-control"
+                        oninput="searchPosts()"
+                    >
+                </div>
+            </div>
+        </nav>
+        <!-- Sidebar -->
+        <div class="offcanvas offcanvas-start" tabindex="-1" id="sidebar">
+            <div class="offcanvas-header">
+                <h5 class="offcanvas-title text-primary">Posts</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="offcanvas"></button>
+            </div>
+            <div class="offcanvas-body">
+                <ul id="sidebar-list" class="list-unstyled"></ul>
+            </div>
         </div>
-    </div>
-    <div class="container mx-auto p-4 sm:p-6">
-        <!-- Header -->
-        <header class="text-center mb-8">
-            <h1 class="text-3xl sm:text-4xl font-bold text-blue-600">البرشامة</h1>
-            <p class="text-gray-600 mt-2">Write and share your ideas with the world.</p>
-        </header>
-        <!-- Search Bar -->
-        <div class="mb-6">
-            <input
-                type="text"
-                id="search"
-                placeholder="Search posts by title..."
-                oninput="searchPosts()"
-                class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
+        <!-- Main Content -->
+        <div class="container my-5">
+            <header class="text-center mb-4">
+                <h1 class="display-4 text-primary fw-bold">البرشامة</h1>
+                <p class="lead text-muted">Write and share your ideas with the world.</p>
+            </header>
+            <!-- Post Form -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-body">
+                    <h5 class="card-title text-primary">Create a New Post</h5>
+                    <input
+                        type="text"
+                        id="title"
+                        placeholder="Post Title"
+                        class="form-control mb-3"
+                    >
+                    <textarea
+                        id="content"
+                        placeholder="Write your article in Markdown..."
+                        class="form-control mb-3"
+                        rows="5"
+                    ></textarea>
+                    <button onclick="savePost()" class="btn btn-primary w-100">Save Post</button>
+                </div>
+            </div>
+            <!-- Posts List -->
+            <h2 class="text-primary mb-4">Stored Posts:</h2>
+            <div id="posts" class="row g-4"></div>
         </div>
-        <!-- Post Form -->
-        <div class="bg-white p-6 rounded-lg shadow-md mb-6">
-            <input
-                type="text"
-                id="title"
-                placeholder="Post Title"
-                class="w-full p-3 border border-gray-300 rounded-lg mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-            <textarea
-                id="content"
-                placeholder="Write your article in Markdown..."
-                class="w-full p-3 border border-gray-300 rounded-lg mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                rows="5"
-            ></textarea>
-            <button
-                onclick="savePost()"
-                class="w-full bg-blue-600 text-white p-3 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-                Save Post
-            </button>
-        </div>
-        <!-- Posts List -->
-        <h2 class="text-2xl font-bold text-gray-800 mb-4">Stored Posts:</h2>
-        <div id="posts" class="space-y-4"></div>
-    </div>
-    <script>
-        const gistId = "bef4411e445bf9040e49a70ef74dc150";
-        const username = "Ziad-Abaza";
-        const encryptedToken = "U2FsdGVkX1/JxL0F3KNCfSb/p+S9UYaWgS/5AUJ2rcF0F7I7wmO7kTsQtFrNTrJsGTTRse0wdWai5wyrMxDLuQ==";
-        function decryptToken(encrypted) {
-            const secretKey = "mySecretKey"; 
-            const decrypted = CryptoJS.AES.decrypt(encrypted, secretKey);
-            const originalToken = decrypted.toString(CryptoJS.enc.Utf8);
-            return originalToken;
-        }
-        const token = decryptToken(encryptedToken);
-        let posts = [];
-        const converter = new showdown.Converter();
-        async function fetchPosts() {
-            showLoading();
-            try {
-                let response = await fetch(`https://api.github.com/gists/${gistId}`);
-                let data = await response.json();
-                posts = JSON.parse(data.files["articles.json"].content || "[]");
-                displayPosts(posts);
-            } catch (error) {
-                console.error("Error fetching posts:", error);
-                Swal.fire("Error", "An error occurred while fetching posts.", "error");
-            } finally {
-                hideLoading();
-            }
-        }
-        function displayPosts(postsToDisplay, searchTerm = "") {
-            const postsContainer = document.getElementById("posts");
-            postsContainer.innerHTML = postsToDisplay.map((post, index) => {
-                let highlightedTitle = post.title;
-                if (searchTerm) {
-                    let regex = new RegExp(`(${searchTerm})`, "gi");
-                    highlightedTitle = post.title.replace(regex, "<span class='bg-yellow-200'>$1</span>");
-                }
-                return `
-                    <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow cursor-pointer" onclick="viewPost(${index})">
-                        <h2 class="text-xl font-bold text-blue-600">${highlightedTitle}</h2>
-                        <p class="text-gray-600 mt-2">${new Date(post.timestamp).toLocaleString()}</p>
-                        <p class="text-gray-500 mt-2">${post.comments ? post.comments.length : 0} comments</p>
-                    </div>
-                `;
-            }).join('');
-        }
+        <!-- Scripts -->
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/showdown/2.1.0/showdown.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.2.0/crypto-js.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/copy-to-clipboard/prism-copy-to-clipboard.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+        <script>
+
+        // Same logic as before, but optimized and organized into functions
+const gistId = "bef4411e445bf9040e49a70ef74dc150";
+const encryptedToken =
+  "U2FsdGVkX1/JxL0F3KNCfSb/p+S9UYaWgS/5AUJ2rcF0F7I7wmO7kTsQtFrNTrJsGTTRse0wdWai5wyrMxDLuQ==";
+
+function decryptToken(encrypted) {
+  const secretKey = "mySecretKey";
+  const decrypted = CryptoJS.AES.decrypt(encrypted, secretKey);
+  return decrypted.toString(CryptoJS.enc.Utf8);
+}
+
+const token = decryptToken(encryptedToken);
+let posts = [];
+const converter = new showdown.Converter();
+
+async function fetchPosts() {
+  try {
+    let response = await fetch(`https://api.github.com/gists/${gistId}`);
+    let data = await response.json();
+    posts = JSON.parse(data.files["articles.json"].content || "[]");
+    if (window.location.pathname.includes("index.html")) {
+      displayPosts(posts);
+      populateSidebar(posts);
+    } else if (window.location.pathname.includes("post.html")) {
+      displayPost();
+    }
+  } catch (error) {
+    console.error("Error fetching posts:", error);
+    Swal.fire("Error", "An error occurred while fetching posts.", "error");
+  }
+}
+      function searchPosts() {
+        let searchTerm = document
+          .getElementById("search")
+          .value.toLowerCase();
+        let filteredPosts = posts.filter((post) =>
+          post.title.toLowerCase().includes(searchTerm)
+        );
+        displayPosts(filteredPosts, searchTerm);
+      }
+async function savePost() {
+  let title = document.getElementById("title").value;
+  let content = document.getElementById("content").value;
+  if (!title || !content)
+    return Swal.fire("Error", "Please enter a title and content.", "error");
+
+  try {
+    let newPost = {
+      title,
+      content,
+      timestamp: new Date().toISOString(),
+      comments: [],
+    };
+    posts.push(newPost);
+    await fetch(`https://api.github.com/gists/${gistId}`, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `token ${token}`,
+      },
+      body: JSON.stringify({
+        files: { "articles.json": { content: JSON.stringify(posts) } },
+      }),
+    });
+    Swal.fire("Success", "Post saved!", "success");
+    fetchPosts();
+    document.getElementById("title").value = "";
+    document.getElementById("content").value = "";
+  } catch (error) {
+    console.error("Error saving post:", error);
+    Swal.fire("Error", "An error occurred while saving the post.", "error");
+  }
+}
+
         function viewPost(index) {
             window.location.href = `post.html?id=${index}`;
         }
-        async function savePost() {
-            let title = document.getElementById("title").value;
-            let content = document.getElementById("content").value;
-            if (!title || !content) return Swal.fire("Error", "Please enter a title and content.", "error");
-            showLoading();
-            try {
-                let newPost = { title, content, timestamp: new Date().toISOString(), comments: [] };
-                posts.push(newPost);
-                await fetch(`https://api.github.com/gists/${gistId}`, {
-                    method: "PATCH",
-                    headers: { "Content-Type": "application/json", "Authorization": `token ${token}` },
-                    body: JSON.stringify({ files: { "articles.json": { content: JSON.stringify(posts) } } })
-                });
-                Swal.fire("Success", "Post saved!", "success");
-                fetchPosts();
-                document.getElementById("title").value = "";
-                document.getElementById("content").value = "";
-            } catch (error) {
-                console.error("Error saving post:", error);
-                Swal.fire("Error", "An error occurred while saving the post.", "error");
-            } finally {
-                hideLoading();
-            }
-        }
-        function searchPosts() {
-            let searchTerm = document.getElementById("search").value.toLowerCase();
-            let filteredPosts = posts.filter(post => post.title.toLowerCase().includes(searchTerm));
-            displayPosts(filteredPosts, searchTerm);
-        }
-        function showLoading() {
-            document.getElementById("loading").classList.remove("hidden");
-        }
-        function hideLoading() {
-            document.getElementById("loading").classList.add("hidden");
-        }
-        fetchPosts();
-    </script>
-</body>
+
+function populateSidebar(posts) {
+  const sidebarList = document.getElementById("sidebar-list");
+  if (!sidebarList) return; // Check if element exists
+
+  sidebarList.innerHTML = posts
+    .map(
+      (post, index) => `
+        <li onclick="viewPost(${index})">${post.title}</li>
+    `
+    )
+    .join("");
+}
+
+async function fetchPosts() {
+  try {
+    let response = await fetch(`https://api.github.com/gists/${gistId}`);
+    let data = await response.json();
+    posts = JSON.parse(data.files["articles.json"].content || "[]");
+    if (window.location.pathname.includes("index.html")) {
+      displayPosts(posts);
+      populateSidebar(posts);
+    } else if (window.location.pathname.includes("post.html")) {
+      displayPost();
+    }
+  } catch (error) {
+    console.error("Error fetching posts:", error);
+    Swal.fire("Error", "An error occurred while fetching posts.", "error");
+  }
+}
+
+function displayPosts(postsToDisplay, searchTerm = "") {
+  const postsContainer = document.getElementById("posts");
+  if (!postsContainer) return; // Check if element exists
+
+  postsContainer.innerHTML = postsToDisplay
+    .map(
+      (post, index) => `
+        <div class="col-md-6 col-lg-4">
+            <div class="card shadow-sm h-100" onclick="viewPost(${index})">
+                <div class="card-body">
+                    <h5 class="card-title text-primary">${post.title}</h5>
+                    <p class="card-text text-muted">${new Date(
+                      post.timestamp
+                    ).toLocaleString()}</p>
+                    <p class="card-text text-secondary">${
+                      post.comments ? post.comments.length : 0
+                    } comments</p>
+                </div>
+            </div>
+        </div>
+    `
+    )
+    .join("");
+}
+
+fetchPosts();
+        </script>
+    </body>
 </html>
