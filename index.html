@@ -84,141 +84,144 @@
         <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/copy-to-clipboard/prism-copy-to-clipboard.min.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
         <script>
-
         // Same logic as before, but optimized and organized into functions
-const gistId = "bef4411e445bf9040e49a70ef74dc150";
-const encryptedToken =
-  "U2FsdGVkX1/JxL0F3KNCfSb/p+S9UYaWgS/5AUJ2rcF0F7I7wmO7kTsQtFrNTrJsGTTRse0wdWai5wyrMxDLuQ==";
+            const gistId = "bef4411e445bf9040e49a70ef74dc150";
+            const encryptedToken =
+            "U2FsdGVkX1/JxL0F3KNCfSb/p+S9UYaWgS/5AUJ2rcF0F7I7wmO7kTsQtFrNTrJsGTTRse0wdWai5wyrMxDLuQ==";
 
-function decryptToken(encrypted) {
-  const secretKey = "mySecretKey";
-  const decrypted = CryptoJS.AES.decrypt(encrypted, secretKey);
-  return decrypted.toString(CryptoJS.enc.Utf8);
-}
+            function decryptToken(encrypted) {
+            const secretKey = "mySecretKey";
+            const decrypted = CryptoJS.AES.decrypt(encrypted, secretKey);
+            return decrypted.toString(CryptoJS.enc.Utf8);
+            }
 
-const token = decryptToken(encryptedToken);
-let posts = [];
-const converter = new showdown.Converter();
+            const token = decryptToken(encryptedToken);
+            let posts = [];
+            const converter = new showdown.Converter();
 
-async function fetchPosts() {
-  try {
-    let response = await fetch(`https://api.github.com/gists/${gistId}`);
-    let data = await response.json();
-    posts = JSON.parse(data.files["articles.json"].content || "[]");
-    if (window.location.pathname.includes("index.html")) {
-      displayPosts(posts);
-      populateSidebar(posts);
-    } else if (window.location.pathname.includes("post.html")) {
-      displayPost();
-    }
-  } catch (error) {
-    console.error("Error fetching posts:", error);
-    Swal.fire("Error", "An error occurred while fetching posts.", "error");
-  }
-}
-      function searchPosts() {
-        let searchTerm = document
-          .getElementById("search")
-          .value.toLowerCase();
-        let filteredPosts = posts.filter((post) =>
-          post.title.toLowerCase().includes(searchTerm)
-        );
-        displayPosts(filteredPosts, searchTerm);
-      }
-async function savePost() {
-  let title = document.getElementById("title").value;
-  let content = document.getElementById("content").value;
-  if (!title || !content)
-    return Swal.fire("Error", "Please enter a title and content.", "error");
+            async function fetchPosts() {
+            try {
+                let response = await fetch(`https://api.github.com/gists/${gistId}`);
+                let data = await response.json();
+                posts = JSON.parse(data.files["articles.json"].content || "[]");
+                if (window.location.pathname.includes("index.html")) {
+                displayPosts(posts);
+                populateSidebar(posts);
+                } else if (window.location.pathname.includes("post.html")) {
+                displayPost();
+                }
+            } catch (error) {
+                console.error("Error fetching posts:", error);
+                Swal.fire("Error", "An error occurred while fetching posts.", "error");
+            }
+            }
+                function searchPosts() {
+                    let searchTerm = document
+                    .getElementById("search")
+                    .value.toLowerCase();
+                    let filteredPosts = posts.filter((post) =>
+                    post.title.toLowerCase().includes(searchTerm)
+                    );
+                    displayPosts(filteredPosts, searchTerm);
+                }
+            async function savePost() {
+            let title = document.getElementById("title").value;
+            let content = document.getElementById("content").value;
+            if (!title || !content)
+                return Swal.fire("Error", "Please enter a title and content.", "error");
 
-  try {
-    let newPost = {
-      title,
-      content,
-      timestamp: new Date().toISOString(),
-      comments: [],
-    };
-    posts.push(newPost);
-    await fetch(`https://api.github.com/gists/${gistId}`, {
-      method: "PATCH",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `token ${token}`,
-      },
-      body: JSON.stringify({
-        files: { "articles.json": { content: JSON.stringify(posts) } },
-      }),
-    });
-    Swal.fire("Success", "Post saved!", "success");
-    fetchPosts();
-    document.getElementById("title").value = "";
-    document.getElementById("content").value = "";
-  } catch (error) {
-    console.error("Error saving post:", error);
-    Swal.fire("Error", "An error occurred while saving the post.", "error");
-  }
-}
+            try {
+                let newPost = {
+                title,
+                content,
+                timestamp: new Date().toISOString(),
+                comments: [],
+                };
+                posts.push(newPost);
+                await fetch(`https://api.github.com/gists/${gistId}`, {
+                method: "PATCH",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `token ${token}`,
+                },
+                body: JSON.stringify({
+                    files: { "articles.json": { content: JSON.stringify(posts) } },
+                }),
+                });
+                Swal.fire("Success", "Post saved!", "success");
+                fetchPosts();
+                document.getElementById("title").value = "";
+                document.getElementById("content").value = "";
+            } catch (error) {
+                console.error("Error saving post:", error);
+                Swal.fire("Error", "An error occurred while saving the post.", "error");
+            }
+            }
 
-        function viewPost(index) {
-            window.location.href = `post.html?id=${index}`;
-        }
+                    function viewPost(index) {
+                        window.location.href = `post.html?id=${index}`;
+                    }
 
-function populateSidebar(posts) {
-  const sidebarList = document.getElementById("sidebar-list");
-  if (!sidebarList) return; // Check if element exists
+            function populateSidebar(posts) {
+            const sidebarList = document.getElementById("sidebar-list");
+            if (!sidebarList) return; // Check if element exists
 
-  sidebarList.innerHTML = posts
-    .map(
-      (post, index) => `
-        <li onclick="viewPost(${index})">${post.title}</li>
-    `
-    )
-    .join("");
-}
+            sidebarList.innerHTML = posts
+                .map(
+                (post, index) => `
+                    <li onclick="viewPost(${index})">${post.title}</li>
+                `
+                )
+                .join("");
+            }
 
-async function fetchPosts() {
-  try {
-    let response = await fetch(`https://api.github.com/gists/${gistId}`);
-    let data = await response.json();
-    posts = JSON.parse(data.files["articles.json"].content || "[]");
-    if (window.location.pathname.includes("index.html")) {
-      displayPosts(posts);
-      populateSidebar(posts);
-    } else if (window.location.pathname.includes("post.html")) {
-      displayPost();
-    }
-  } catch (error) {
-    console.error("Error fetching posts:", error);
-    Swal.fire("Error", "An error occurred while fetching posts.", "error");
-  }
-}
+            async function fetchPosts() {
+            try {
+                let response = await fetch(`https://api.github.com/gists/${gistId}`);
+                let data = await response.json();
+                posts = JSON.parse(data.files["articles.json"].content || "[]");
+                if (window.location.pathname.includes("index.html")) {
+                displayPosts(posts);
+                populateSidebar(posts);
+                } else if (window.location.pathname.includes("post.html")) {
+                displayPost();
+                }
+            } catch (error) {
+                console.error("Error fetching posts:", error);
+                Swal.fire("Error", "An error occurred while fetching posts.", "error");
+            }
+            }
 
-function displayPosts(postsToDisplay, searchTerm = "") {
-  const postsContainer = document.getElementById("posts");
-  if (!postsContainer) return; // Check if element exists
+            function displayPosts(postsToDisplay, searchTerm = "") {
+            const postsContainer = document.getElementById("posts");
+            if (!postsContainer) return; // Check if element exists
 
-  postsContainer.innerHTML = postsToDisplay
-    .map(
-      (post, index) => `
-        <div class="col-md-6 col-lg-4">
-            <div class="card shadow-sm h-100" onclick="viewPost(${index})">
-                <div class="card-body">
-                    <h5 class="card-title text-primary">${post.title}</h5>
-                    <p class="card-text text-muted">${new Date(
-                      post.timestamp
-                    ).toLocaleString()}</p>
-                    <p class="card-text text-secondary">${
-                      post.comments ? post.comments.length : 0
-                    } comments</p>
-                </div>
-            </div>
-        </div>
-    `
-    )
-    .join("");
-}
+            postsContainer.innerHTML = postsToDisplay
+                .map(
+                (post, index) => `
+                    <div class="col-md-6 col-lg-4">
+                        <div class="card shadow-sm h-100" onclick="viewPost(${index})">
+                            <div class="card-body">
+                                <h5 class="card-title text-primary">${post.title}</h5>
+                                <p class="card-text text-muted">${new Date(
+                                post.timestamp
+                                ).toLocaleString()}</p>
+                                <p class="card-text text-secondary">${
+                                post.comments ? post.comments.length : 0
+                                } comments</p>
+                            </div>
+                        </div>
+                    </div>
+                `
+                )
+                .join("");
+            }
 
-fetchPosts();
+            
+            // Ensure fetchPosts is called when the page loads
+            document.addEventListener("DOMContentLoaded", () => {
+                fetchPosts();
+            });
         </script>
     </body>
 </html>
