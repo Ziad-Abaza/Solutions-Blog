@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>View Post - البرشامة</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/showdown/2.1.0/showdown.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.2.0/crypto-js.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/copy-to-clipboard/prism-copy-to-clipboard.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        .markdown-content h1 { font-size: 2em; font-weight: bold; margin: 0.67em 0; }
+        .markdown-content h2 { font-size: 1.5em; font-weight: bold; margin: 0.83em 0; }
+        .markdown-content h3 { font-size: 1.17em; font-weight: bold; margin: 1em 0; }
+        .markdown-content p { margin: 1em 0; }
+        .markdown-content a { color: #3b82f6; text-decoration: underline; }
+        .markdown-content ul { list-style-type: disc; margin: 1em 0; padding-left: 40px; }
+        .markdown-content ol { list-style-type: decimal; margin: 1em 0; padding-left: 40px; }
+        .markdown-content code { background-color: #f3f4f6; padding: 2px 4px; border-radius: 4px; }
+        .markdown-content pre { background-color: #2d2d2d; padding: 1em; border-radius: 8px; overflow-x: auto; margin: 1em 0; }
+        .markdown-content pre code { background-color: transparent; padding: 0; border-radius: 0; color: #f8f8f2; }
+        .comments .comment {
+            background: linear-gradient(145deg, #ffffff, #f9fafb);
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 12px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            transition: box-shadow 0.3s ease;
+        }
+        .comments .comment:hover {
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        .copy-button {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: #3b82f6;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9em;
+        }
+        .copy-button:hover {
+            background-color: #2563eb;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 text-gray-800">
+    <div class="container mx-auto p-4 sm:p-6">
+        <div id="post-container"></div>
+        <button
+            onclick="window.history.back()"
+            class="w-full bg-red-600 text-white p-3 rounded-lg mt-6 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500"
+        >
+            Back to Posts
+        </button>
+    </div>
+    <script>
+        const gistId = "bef4411e445bf9040e49a70ef74dc150";
+        const encryptedToken = "U2FsdGVkX1/JxL0F3KNCfSb/p+S9UYaWgS/5AUJ2rcF0F7I7wmO7kTsQtFrNTrJsGTTRse0wdWai5wyrMxDLuQ==";
+        function decryptToken(encrypted) {
+            const secretKey = "mySecretKey"; 
+            const decrypted = CryptoJS.AES.decrypt(encrypted, secretKey);
+            const originalToken = decrypted.toString(CryptoJS.enc.Utf8);
+            return originalToken;
+        }
+        const token = decryptToken(encryptedToken);
+        let posts = [];
+        const converter = new showdown.Converter();
+        async function fetchPosts() {
+            try {
+                let response = await fetch(`https://api.github.com/gists/${gistId}`);
+                let data = await response.json();
+                posts = JSON.parse(data.files["articles.json"].content || "[]");
+                displayPost();
+            } catch (error) {
+                console.error("Error fetching posts:", error);
+                Swal.fire("Error", "An error occurred while fetching the post.", "error");
+            }
+        }
+        function displayPost() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const postId = urlParams.get('id');
+            const post = posts[postId];
+            if (!post) {
+                document.getElementById("post-container").innerHTML = "<h1 class='text-3xl font-bold text-red-600'>Post not found</h1>";
+                return;
+            }
+            const html = converter.makeHtml(post.content);
+            document.getElementById("post-container").innerHTML = `
+                <h1 class="text-3xl font-bold text-blue-600 mb-4">${post.title}</h1>
+                <div class="markdown-content bg-white p-6 rounded-lg shadow-md">${html}</div>
+                <div class="comments mt-6">
+                    <h3 class="text-2xl font-bold text-gray-800 mb-4">Comments:</h3>
+                    ${post.comments ? post.comments.map(comment => `
+                        <div class="comment">
+                            <div class="markdown-content">${converter.makeHtml(comment.text)}</div>
+                            <small class="text-gray-500">${new Date(comment.timestamp).toLocaleString()}</small>
+                        </div>
+                    `).join('') : "<p class='text-gray-600'>No comments yet.</p>"}
+                    <textarea
+                        id="commentText"
+                        placeholder="Add a comment (Markdown or plain text)..."
+                        class="w-full p-3 border border-gray-300 rounded-lg mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        rows="3"
+                    ></textarea>
+                    <button
+                        onclick="addComment(${postId})"
+                        class="w-full bg-blue-600 text-white p-3 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    >
+                        Add Comment
+                    </button>
+                </div>
+            `;
+            addCopyButtons();
+            Prism.highlightAll();
+        }
+        async function addComment(index) {
+            let commentText = document.getElementById("commentText").value;
+            if (!commentText) return Swal.fire("Error", "Please enter a comment.", "error");
+            try {
+                let newComment = { text: commentText, timestamp: new Date().toISOString() };
+                posts[index].comments = posts[index].comments || [];
+                posts[index].comments.push(newComment);
+                await fetch(`https://api.github.com/gists/${gistId}`, {
+                    method: "PATCH",
+                    headers: { "Content-Type": "application/json", "Authorization": `token ${token}` },
+                    body: JSON.stringify({ files: { "articles.json": { content: JSON.stringify(posts) } } })
+                });
+                Swal.fire("Success", "Comment added!", "success");
+                displayPost();
+            } catch (error) {
+                console.error("Error adding comment:", error);
+                Swal.fire("Error", "An error occurred while adding the comment.", "error");
+            }
+        }
+        function addCopyButtons() {
+            document.querySelectorAll('pre').forEach((pre) => {
+                const button = document.createElement('button');
+                button.className = 'copy-button';
+                button.textContent = 'Copy';
+                button.onclick = () => {
+                    navigator.clipboard.writeText(pre.querySelector('code').textContent);
+                    button.textContent = 'Copied!';
+                    setTimeout(() => {
+                        button.textContent = 'Copy';
+                    }, 2000);
+                };
+                pre.style.position = 'relative';
+                pre.appendChild(button);
+            });
+        }
+        fetchPosts();
+    </script>
+</body>
+</html>

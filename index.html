@@ -24,46 +24,13 @@
         .markdown-content code { background-color: #f3f4f6; padding: 2px 4px; border-radius: 4px; }
         .markdown-content pre { background-color: #2d2d2d; padding: 1em; border-radius: 8px; overflow-x: auto; margin: 1em 0; }
         .markdown-content pre code { background-color: transparent; padding: 0; border-radius: 0; color: #f8f8f2; }
-
-        .comments .comment {
-            background: linear-gradient(145deg, #ffffff, #f9fafb);
-            border: 1px solid #e5e7eb;
-            border-radius: 8px;
-            padding: 16px;
-            margin-bottom: 12px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            transition: box-shadow 0.3s ease;
-        }
-
-        .comments .comment:hover {
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-        }
-
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
-
         .loader {
             border-top-color: #3b82f6;
             animation: spin 1s linear infinite;
-        }
-
-        .copy-button {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            background-color: #3b82f6;
-            color: white;
-            border: none;
-            padding: 5px 10px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 0.9em;
-        }
-
-        .copy-button:hover {
-            background-color: #2563eb;
         }
     </style>
 </head>
@@ -75,14 +42,12 @@
             <p class="text-center text-gray-700">Loading...</p>
         </div>
     </div>
-
     <div class="container mx-auto p-4 sm:p-6">
         <!-- Header -->
         <header class="text-center mb-8">
             <h1 class="text-3xl sm:text-4xl font-bold text-blue-600">البرشامة</h1>
             <p class="text-gray-600 mt-2">Write and share your ideas with the world.</p>
         </header>
-
         <!-- Search Bar -->
         <div class="mb-6">
             <input
@@ -93,7 +58,6 @@
                 class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
         </div>
-
         <!-- Post Form -->
         <div class="bg-white p-6 rounded-lg shadow-md mb-6">
             <input
@@ -115,30 +79,23 @@
                 Save Post
             </button>
         </div>
-
         <!-- Posts List -->
         <h2 class="text-2xl font-bold text-gray-800 mb-4">Stored Posts:</h2>
         <div id="posts" class="space-y-4"></div>
     </div>
-
     <script>
         const gistId = "bef4411e445bf9040e49a70ef74dc150";
         const username = "Ziad-Abaza";
-        
         const encryptedToken = "U2FsdGVkX1/JxL0F3KNCfSb/p+S9UYaWgS/5AUJ2rcF0F7I7wmO7kTsQtFrNTrJsGTTRse0wdWai5wyrMxDLuQ==";
-        
         function decryptToken(encrypted) {
             const secretKey = "mySecretKey"; 
             const decrypted = CryptoJS.AES.decrypt(encrypted, secretKey);
             const originalToken = decrypted.toString(CryptoJS.enc.Utf8);
             return originalToken;
         }
-        
         const token = decryptToken(encryptedToken);
-        
         let posts = [];
         const converter = new showdown.Converter();
-        
         async function fetchPosts() {
             showLoading();
             try {
@@ -153,7 +110,6 @@
                 hideLoading();
             }
         }
-        
         function displayPosts(postsToDisplay, searchTerm = "") {
             const postsContainer = document.getElementById("posts");
             postsContainer.innerHTML = postsToDisplay.map((post, index) => {
@@ -171,17 +127,17 @@
                 `;
             }).join('');
         }
-        
+        function viewPost(index) {
+            window.location.href = `post.html?id=${index}`;
+        }
         async function savePost() {
             let title = document.getElementById("title").value;
             let content = document.getElementById("content").value;
             if (!title || !content) return Swal.fire("Error", "Please enter a title and content.", "error");
-            
             showLoading();
             try {
                 let newPost = { title, content, timestamp: new Date().toISOString(), comments: [] };
                 posts.push(newPost);
-                
                 await fetch(`https://api.github.com/gists/${gistId}`, {
                     method: "PATCH",
                     headers: { "Content-Type": "application/json", "Authorization": `token ${token}` },
@@ -198,103 +154,17 @@
                 hideLoading();
             }
         }
-        
-        function viewPost(index) {
-            let post = posts[index];
-            let html = converter.makeHtml(post.content);
-            document.body.innerHTML = `
-                <div class="container mx-auto p-4 sm:p-6">
-                    <h1 class="text-3xl font-bold text-blue-600 mb-4">${post.title}</h1>
-                    <div class="markdown-content bg-white p-6 rounded-lg shadow-md">${html}</div>
-                    <div class="comments mt-6">
-                        <h3 class="text-2xl font-bold text-gray-800 mb-4">Comments:</h3>
-                        ${post.comments ? post.comments.map(comment => `
-                            <div class="comment">
-                                <div class="markdown-content">${converter.makeHtml(comment.text)}</div>
-                                <small class="text-gray-500">${new Date(comment.timestamp).toLocaleString()}</small>
-                            </div>
-                        `).join('') : "<p class='text-gray-600'>No comments yet.</p>"}
-                        <textarea
-                            id="commentText"
-                            placeholder="Add a comment (Markdown or plain text)..."
-                            class="w-full p-3 border border-gray-300 rounded-lg mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                            rows="3"
-                        ></textarea>
-                        <button
-                            onclick="addComment(${index})"
-                            class="w-full bg-blue-600 text-white p-3 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        >
-                            Add Comment
-                        </button>
-                    </div>
-                    <button
-                        onclick="location.reload()"
-                        class="w-full bg-red-600 text-white p-3 rounded-lg mt-6 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500"
-                    >
-                        Back to Posts
-                    </button>
-                </div>
-            `;
-            addCopyButtons();
-            Prism.highlightAll();
-        }
-        
-        function addCopyButtons() {
-            document.querySelectorAll('pre').forEach((pre) => {
-                const button = document.createElement('button');
-                button.className = 'copy-button';
-                button.textContent = 'Copy';
-                button.onclick = () => {
-                    navigator.clipboard.writeText(pre.querySelector('code').textContent);
-                    button.textContent = 'Copied!';
-                    setTimeout(() => {
-                        button.textContent = 'Copy';
-                    }, 2000);
-                };
-                pre.style.position = 'relative';
-                pre.appendChild(button);
-            });
-        }
-        
-        async function addComment(index) {
-            let commentText = document.getElementById("commentText").value;
-            if (!commentText) return Swal.fire("Error", "Please enter a comment.", "error");
-            
-            showLoading();
-            try {
-                let newComment = { text: commentText, timestamp: new Date().toISOString() };
-                posts[index].comments = posts[index].comments || [];
-                posts[index].comments.push(newComment);
-                
-                await fetch(`https://api.github.com/gists/${gistId}`, {
-                    method: "PATCH",
-                    headers: { "Content-Type": "application/json", "Authorization": `token ${token}` },
-                    body: JSON.stringify({ files: { "articles.json": { content: JSON.stringify(posts) } } })
-                });
-                Swal.fire("Success", "Comment added!", "success");
-                viewPost(index);
-            } catch (error) {
-                console.error("Error adding comment:", error);
-                Swal.fire("Error", "An error occurred while adding the comment.", "error");
-            } finally {
-                hideLoading();
-            }
-        }
-        
         function searchPosts() {
             let searchTerm = document.getElementById("search").value.toLowerCase();
             let filteredPosts = posts.filter(post => post.title.toLowerCase().includes(searchTerm));
             displayPosts(filteredPosts, searchTerm);
         }
-        
         function showLoading() {
             document.getElementById("loading").classList.remove("hidden");
         }
-        
         function hideLoading() {
             document.getElementById("loading").classList.add("hidden");
         }
-        
         fetchPosts();
     </script>
 </body>
